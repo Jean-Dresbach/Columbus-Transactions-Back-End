@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 
-import { UserService } from "../services/user.service"
+import { UserService } from "../services/user.service.js"
 
 const userService = new UserService()
 
@@ -11,9 +11,9 @@ export class UserController {
             const { name, email, password } = request.body
             const hashedPassword = await bcrypt.hash(password, 10)
             const result = await userService.create({
-                name,
+                name: name,
                 email,
-                hashedPassword,
+                password: hashedPassword,
             })
 
             return response.status(result.code).json(result)
@@ -32,8 +32,18 @@ export class UserController {
 
             const result = await userService.findByEmail(email)
 
-            if (!user || !(await bcrypt.compare(password, user.password))) {
-                return res
+            if (result.code !== 200) {
+                return response.status(result.code).json(result)
+            }
+
+            const user = result.data
+
+            const isPasswordValid = await bcrypt.compare(
+                password,
+                user.password
+            )
+            if (!isPasswordValid) {
+                return response
                     .status(401)
                     .json({ code: 401, message: "Credenciais inválidas." })
             }
@@ -42,7 +52,7 @@ export class UserController {
                 expiresIn: stayLoggedIn ? "7d" : process.env.JWT_EXPIRATION,
             })
 
-            response.json({ token })
+            return response.json({ token })
         } catch (error) {
             console.log(error)
 
