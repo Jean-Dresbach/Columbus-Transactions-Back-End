@@ -1,4 +1,4 @@
-import { repository } from "../database/prisma.connection"
+import { repository } from "../database/prisma.connection.js"
 
 export class UserService {
     async create({ email, name, password }) {
@@ -38,40 +38,17 @@ export class UserService {
             },
         })
 
+        if (!user) {
+            return {
+                code: 404,
+                message: "Usuário não encontrado.",
+            }
+        }
+
         return {
             code: 200,
             message: "Usuário encontrado com sucesso.",
             data: user,
         }
     }
-
-    //   async update({ userId, email, name, password }) {
-    //     await repository.user.update({
-    //       where: {
-    //         id: userId,
-    //       },
-    //       data: {
-    //         name,
-    //         email,
-    //         password,
-    //       },
-    //     });
-
-    //     return {
-    //       code: 200,
-    //       message: "Usuário atualizado com sucesso.",
-    //     };
-    //   }
-
-    //   // Método para excluir um usuário
-    //   async delete(id) {
-    //     await repository.user.delete({
-    //       where: { id },
-    //     });
-
-    //     return {
-    //       code: 200,
-    //       message: "Usuário removido com sucesso.",
-    //     };
-    //   }
 }
