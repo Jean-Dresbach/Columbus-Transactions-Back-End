@@ -5,7 +5,7 @@ const transactionService = new TransactionService()
 export class TransactionController {
     async index(request, response) {
         try {
-            const { userId } = request.params
+            const { userId } = request
 
             const result = await transactionService.findAll(userId)
 
@@ -21,7 +21,7 @@ export class TransactionController {
 
     async store(request, response) {
         try {
-            const { userId } = request.params
+            const { userId } = request
             const { value, type, method, category } = request.body
 
             const result = await transactionService.create({
@@ -48,7 +48,7 @@ export class TransactionController {
             const { value, type, method, category } = request.body
 
             const result = await transactionService.update({
-                id: transactionId,
+                id: Number(transactionId),
                 value,
                 type,
                 method,
@@ -69,7 +69,9 @@ export class TransactionController {
         try {
             const { transactionId } = request.params
 
-            const result = await transactionService.delete(transactionId)
+            const result = await transactionService.delete(
+                Number(transactionId)
+            )
 
             response.status(result.code).json(result)
         } catch (error) {

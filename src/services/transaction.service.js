@@ -6,9 +6,10 @@ export class TransactionService {
             where: { userId },
             select: {
                 id: true,
-                title: true,
-                description: true,
-                status: true,
+                value: true,
+                type: true,
+                method: true,
+                category: true,
             },
             orderBy: {
                 createdAt: "desc",
@@ -28,6 +29,7 @@ export class TransactionService {
                 value,
                 type,
                 method,
+                category,
                 userId,
             },
         })

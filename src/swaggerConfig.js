@@ -1,15 +1,25 @@
 import swaggerJsdoc from "swagger-jsdoc"
 
 const options = {
-    definition: {
+    swaggerDefinition: {
         openapi: "3.0.0",
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                },
+            },
+        },
+        security: [{ bearerAuth: [] }],
         info: {
             title: "API de Transações",
             version: "1.0.0",
-            description: "API para gerenciar usuários e transações.",
+            description: "Documentação da API de transações",
         },
     },
-    apis: ["./src/routes/*.js"],
+    apis: ["./src/routes/*.js"], // Atualize o caminho conforme necessário
 }
 
 const swaggerDocs = swaggerJsdoc(options)

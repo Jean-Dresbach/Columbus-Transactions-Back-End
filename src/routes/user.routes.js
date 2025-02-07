@@ -14,7 +14,7 @@ const userController = new UserController()
 
 /**
  * @swagger
- * /users/create:
+ * /users/signup:
  *   post:
  *     summary: Cria um novo usuário
  *     tags: [Users]
@@ -40,7 +40,7 @@ const userController = new UserController()
  *       409:
  *         description: E-mail já cadastrado.
  */
-router.post("/create", userController.signup)
+router.post("/signup", userController.signup)
 
 /**
  * @swagger
