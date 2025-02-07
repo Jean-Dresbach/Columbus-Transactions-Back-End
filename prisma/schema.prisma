@@ -29,8 +29,9 @@ model Transaction {
   type     String
   method   String
   category String
-  userId   Int
+  userId   Int     @map("user_id")
   user     User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
 
-   @@map("transactions")
+  @@map("transactions")
 }
