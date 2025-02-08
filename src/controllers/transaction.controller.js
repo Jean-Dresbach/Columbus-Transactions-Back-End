@@ -48,14 +48,14 @@ export class TransactionController {
             const { value, type, method, category } = request.body
 
             const result = await transactionService.update({
-                id: Number(transactionId),
+                id: transactionId,
                 value,
                 type,
                 method,
                 category,
             })
 
-            response.status(result.code).json(result)
+            return response.status(result.code).json(result)
         } catch (error) {
             console.log(error)
 
@@ -69,11 +69,9 @@ export class TransactionController {
         try {
             const { transactionId } = request.params
 
-            const result = await transactionService.delete(
-                Number(transactionId)
-            )
+            const result = await transactionService.delete(transactionId)
 
-            response.status(result.code).json(result)
+            return response.status(result.code).json(result)
         } catch (error) {
             console.log(error)
 
