@@ -1,6 +1,6 @@
 import express from "express"
-
 import { UserController } from "../controllers/user.controller.js"
+import { authenticateToken } from "../middlewares/auth.middleware.js"
 
 const router = express.Router()
 const userController = new UserController()
@@ -39,8 +39,10 @@ const userController = new UserController()
  *         description: Usuário criado com sucesso.
  *       409:
  *         description: E-mail já cadastrado.
+ *       500:
+ *         description: Erro interno do servidor.
  */
-router.post("/signup", userController.signup)
+router.post("/signup", userController.store)
 
 /**
  * @swagger
@@ -69,8 +71,94 @@ router.post("/signup", userController.signup)
  *         description: Login realizado com sucesso.
  *       401:
  *         description: Credenciais inválidas.
+ *       500:
+ *         description: Erro interno do servidor.
  */
-
 router.post("/login", userController.login)
+
+/**
+ * @swagger
+ * /users:
+ *   put:
+ *     summary: Atualiza um usuário existente
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: Usuário atualizado com sucesso.
+ *       404:
+ *         description: Usuário não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+router.put("/", authenticateToken, userController.update)
+
+/**
+ * @swagger
+ * /users/update-password:
+ *   put:
+ *     summary: Atualiza a senha de um usuário
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *                 example: "oldpassword123"
+ *               newPassword:
+ *                 type: string
+ *                 example: "newpassword456"
+ *     responses:
+ *       200:
+ *         description: Senha atualizada com sucesso.
+ *       401:
+ *         description: Senha antiga incorreta.
+ *       404:
+ *         description: Usuário não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+router.put("/update-password", authenticateToken, userController.updatePassword)
+
+/**
+ * @swagger
+ * /users:
+ *   delete:
+ *     summary: Deleta um usuário existente
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Usuário deletado com sucesso.
+ *       404:
+ *         description: Usuário não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+router.delete("/", authenticateToken, userController.delete)
 
 export default router
