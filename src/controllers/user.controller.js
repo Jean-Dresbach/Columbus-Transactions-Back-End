@@ -74,7 +74,6 @@ export class UserController {
             const data = {
                 name,
                 email,
-                password,
             }
 
             if (password) {
@@ -87,6 +86,46 @@ export class UserController {
         } catch (error) {
             console.log(error)
 
+            return response.status(500).json({
+                message: "Erro interno do servidor.",
+            })
+        }
+    }
+
+    async updatePassword(request, response) {
+        try {
+            const { userId } = request
+            const { oldPassword, newPassword } = request.body
+
+            const result = await userService.findUser(userId)
+            if (result.code !== 200) {
+                return response.status(result.code).json(result)
+            }
+
+            const user = result.data
+
+            // 2. Validar a senha antiga
+            const isPasswordValid = await bcrypt.compare(
+                oldPassword,
+                user.password
+            )
+            if (!isPasswordValid) {
+                return response
+                    .status(401)
+                    .json({ code: 401, message: "Senha antiga incorreta." })
+            }
+
+            // 3. Hashear a nova senha
+            const hashedNewPassword = await bcrypt.hash(newPassword, 10)
+
+            // 4. Atualizar a senha no banco de dados
+            const updateResult = await userService.update(userId, {
+                password: hashedNewPassword,
+            })
+
+            return response.status(updateResult.code).json(updateResult)
+        } catch (error) {
+            console.log(error)
             return response.status(500).json({
                 message: "Erro interno do servidor.",
             })

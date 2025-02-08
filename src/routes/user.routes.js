@@ -1,5 +1,4 @@
 import express from "express"
-
 import { UserController } from "../controllers/user.controller.js"
 import { authenticateToken } from "../middlewares/auth.middleware.js"
 
@@ -110,6 +109,39 @@ router.post("/login", userController.login)
  *         description: Erro interno do servidor.
  */
 router.put("/", authenticateToken, userController.update)
+
+/**
+ * @swagger
+ * /users/update-password:
+ *   put:
+ *     summary: Atualiza a senha de um usuário
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *                 example: "oldpassword123"
+ *               newPassword:
+ *                 type: string
+ *                 example: "newpassword456"
+ *     responses:
+ *       200:
+ *         description: Senha atualizada com sucesso.
+ *       401:
+ *         description: Senha antiga incorreta.
+ *       404:
+ *         description: Usuário não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+router.put("/update-password", authenticateToken, userController.updatePassword)
 
 /**
  * @swagger
