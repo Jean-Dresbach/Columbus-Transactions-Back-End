@@ -28,16 +28,15 @@ export class UserService {
     }
 
     async findUser(identifier) {
-        const isUUID = /^[0-9a-fA-F-]{36}$/.test(identifier) // Verifica se o identifier é um UUID válido
+        const isUUID = /^[0-9a-fA-F-]{36}$/.test(identifier)
 
         const user = await repository.user.findFirst({
-            where: isUUID
-                ? { id: identifier } // Busca por ID
-                : { email: identifier }, // Busca por e-mail
+            where: isUUID ? { id: identifier } : { email: identifier },
             select: {
                 id: true,
                 name: true,
                 email: true,
+                password: true,
             },
         })
 
@@ -67,14 +66,33 @@ export class UserService {
             }
         }
 
-        await repository.user.update({
+        if (data.email && data.email !== existingUser.email) {
+            const emailAlreadyRegistered = await repository.user.findUnique({
+                where: { email: data.email },
+            })
+
+            if (emailAlreadyRegistered) {
+                return {
+                    code: 409,
+                    message: "E-mail já registrado!",
+                }
+            }
+        }
+
+        const updatedUser = await repository.user.update({
             where: { id },
             data,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+            },
         })
 
         return {
             code: 200,
             message: "Usuário atualizado com sucesso.",
+            data: updatedUser,
         }
     }
 

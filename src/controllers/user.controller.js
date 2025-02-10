@@ -35,7 +35,9 @@ export class UserController {
             const result = await userService.findUser(email)
 
             if (result.code !== 200) {
-                return response.status(result.code).json(result)
+                return response
+                    .status(401)
+                    .json({ code: 401, message: "Credenciais inválidas." })
             }
 
             const user = result.data
@@ -55,6 +57,8 @@ export class UserController {
                 expiresIn: stayLoggedIn ? "7d" : process.env.JWT_EXPIRATION,
             })
 
+            delete result.data.password
+
             return response.json({ token, ...result })
         } catch (error) {
             console.log(error)
@@ -69,15 +73,11 @@ export class UserController {
     async update(request, response) {
         try {
             const { userId } = request
-            const { name, email, password } = request.body
+            const { name, email } = request.body
 
             const data = {
                 name,
                 email,
-            }
-
-            if (password) {
-                data.password = await bcrypt.hash(password, 10)
             }
 
             const result = await userService.update(userId, data)
@@ -104,7 +104,6 @@ export class UserController {
 
             const user = result.data
 
-            // 2. Validar a senha antiga
             const isPasswordValid = await bcrypt.compare(
                 oldPassword,
                 user.password
@@ -112,16 +111,26 @@ export class UserController {
             if (!isPasswordValid) {
                 return response
                     .status(401)
-                    .json({ code: 401, message: "Senha antiga incorreta." })
+                    .json({ code: 401, message: "Senha atual incorreta." })
             }
 
-            // 3. Hashear a nova senha
+            if (oldPassword === newPassword) {
+                return response
+                    .status(400)
+                    .json({
+                        code: 400,
+                        message:
+                            "A nova senha não pode ser igual à senha atual.",
+                    })
+            }
+
             const hashedNewPassword = await bcrypt.hash(newPassword, 10)
 
-            // 4. Atualizar a senha no banco de dados
             const updateResult = await userService.update(userId, {
                 password: hashedNewPassword,
             })
+
+            updateResult.message = "Senha atulizada com sucesso."
 
             return response.status(updateResult.code).json(updateResult)
         } catch (error) {
